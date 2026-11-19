@@ -1,6 +1,7 @@
 /* Bloomhaven Care — small, dependency-free progressive enhancement. The site works without this file. */
 (function () {
   'use strict';
+  var ROOT = document.documentElement.getAttribute('data-root') || '/';
 
   /* Mobile menu */
   var btn = document.getElementById('menu-btn');
@@ -12,6 +13,28 @@
       btn.setAttribute('aria-expanded', String(open));
     });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && nav.classList.contains('open')) { close(); btn.focus(); } });
+  }
+
+  /* Text size control (remembered in this browser only; the site works without it) */
+  var groups = document.querySelectorAll('.tsz');
+  if (groups.length) {
+    var apply = function (n) {
+      var c = document.documentElement.classList;
+      c.remove('fs-1', 'fs-2');
+      if (n > 0) c.add('fs-' + n);
+      document.querySelectorAll('.tsz button').forEach(function (b) { b.setAttribute('aria-pressed', String(parseInt(b.getAttribute('data-fs'), 10) === n)); });
+    };
+    var saved = 0;
+    try { saved = parseInt(localStorage.getItem('bh-fs') || '0', 10) || 0; } catch (e) { /* storage unavailable */ }
+    groups.forEach(function (g) { g.hidden = false; });
+    apply(saved);
+    document.querySelectorAll('.tsz button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var n = parseInt(b.getAttribute('data-fs'), 10);
+        apply(n);
+        try { localStorage.setItem('bh-fs', String(n)); } catch (e) { /* ignore */ }
+      });
+    });
   }
 
   /* Postcode checker */
@@ -28,10 +51,10 @@
       var district = m[1], town = null;
       Object.keys(cov).forEach(function (t) { if (cov[t].indexOf(district) > -1) town = t; });
       if (town) {
-        out.innerHTML = '<strong>Good news: ' + district + ' is in our ' + town + ' area.</strong> Call us on the number above or <a href="/contact/">send an enquiry</a> and we will talk through what you need.';
+        out.innerHTML = '<strong>Good news: ' + district + ' is in our ' + town + ' area.</strong> Call us on the number above or <a href="' + ROOT + 'contact/">send an enquiry</a> and we will talk through what you need.';
         out.classList.add('ok');
       } else {
-        out.innerHTML = '<strong>' + district + ' is outside the areas we list.</strong> We may still be able to help or point you to someone who can. Please <a href="/contact/">get in touch</a>.';
+        out.innerHTML = '<strong>' + district + ' is outside the areas we list.</strong> We may still be able to help or point you to someone who can. Please <a href="' + ROOT + 'contact/">get in touch</a>.';
         out.classList.add('maybe');
       }
     });
